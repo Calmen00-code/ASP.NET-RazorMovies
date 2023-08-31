@@ -27,18 +27,29 @@ namespace RazorPagesMovie.Pages
 
         public async Task OnGetAsync()
         {
+            // Use LINQ to get list of genres
+            IQueryable<string> genreQuery = from m in _context.Movie
+                                            orderby m.Genre
+                                            select m.Genre;
+
             /**
              * if the string is invalid, then we will just return the existing
              * movies list from the database. Otherwise, returns all the movies
              * that contains the search string in it.
              */
-            var movies = from m in _context.Movie select m;
+            var movies = from m in _context.Movie 
+                         select m;
 
             if (!string.IsNullOrEmpty(SearchString))
             {
                 movies = movies.Where(s => s.Title.Contains(SearchString));
             }
 
+            if (!string.IsNullOrEmpty(MovieGenre))
+            {
+                movies = movies.Where(g => g.Genre == MovieGenre);
+            }
+            Genres = new SelectList(await genreQuery.Distinct().ToListAsync());
             Movie = await movies.ToListAsync();
         }
     }
